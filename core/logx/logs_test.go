@@ -257,7 +257,7 @@ func TestWithKeepDays(t *testing.T) {
 	fn := WithKeepDays(1)
 	var opt logOptions
 	fn(&opt)
-	assert.Equal(t, 1, opt.keepDays)
+	assert.Equal(t, 1*24*3600, opt.keepAge)
 }
 
 func BenchmarkCopyByteSliceAppend(b *testing.B) {

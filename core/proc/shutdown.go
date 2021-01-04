@@ -9,7 +9,7 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/tal-tech/go-zero/core/logx"
+	"github.com/brucewang585/go-zero/core/logx"
 )
 
 const (

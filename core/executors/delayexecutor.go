@@ -4,7 +4,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/tal-tech/go-zero/core/threading"
+	"github.com/brucewang585/go-zero/core/threading"
 )
 
 type DelayExecutor struct {

@@ -6,12 +6,12 @@ import (
 	"strings"
 	"text/template"
 
-	"github.com/tal-tech/go-zero/tools/goctl/api/spec"
-	"github.com/tal-tech/go-zero/tools/goctl/api/util"
-	"github.com/tal-tech/go-zero/tools/goctl/config"
-	ctlutil "github.com/tal-tech/go-zero/tools/goctl/util"
-	"github.com/tal-tech/go-zero/tools/goctl/util/format"
-	"github.com/tal-tech/go-zero/tools/goctl/vars"
+	"github.com/brucewang585/go-zero/tools/goctl/api/spec"
+	"github.com/brucewang585/go-zero/tools/goctl/api/util"
+	"github.com/brucewang585/go-zero/tools/goctl/config"
+	ctlutil "github.com/brucewang585/go-zero/tools/goctl/util"
+	"github.com/brucewang585/go-zero/tools/goctl/util/format"
+	"github.com/brucewang585/go-zero/tools/goctl/vars"
 )
 
 const (

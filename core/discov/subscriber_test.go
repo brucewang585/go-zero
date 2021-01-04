@@ -4,7 +4,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
-	"github.com/tal-tech/go-zero/core/discov/internal"
+	"github.com/brucewang585/go-zero/core/discov/internal"
 )
 
 const (

@@ -8,8 +8,8 @@ import (
 	"sync/atomic"
 	"time"
 
-	"github.com/tal-tech/go-zero/core/limit"
-	"github.com/tal-tech/go-zero/core/stores/redis"
+	"github.com/brucewang585/go-zero/core/limit"
+	"github.com/brucewang585/go-zero/core/stores/redis"
 )
 
 const (

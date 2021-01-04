@@ -10,11 +10,11 @@ import (
 	"strings"
 	"text/template"
 
-	"github.com/tal-tech/go-zero/tools/goctl/api/spec"
-	apiutil "github.com/tal-tech/go-zero/tools/goctl/api/util"
-	"github.com/tal-tech/go-zero/tools/goctl/config"
-	"github.com/tal-tech/go-zero/tools/goctl/util"
-	"github.com/tal-tech/go-zero/tools/goctl/util/format"
+	"github.com/brucewang585/go-zero/tools/goctl/api/spec"
+	apiutil "github.com/brucewang585/go-zero/tools/goctl/api/util"
+	"github.com/brucewang585/go-zero/tools/goctl/config"
+	"github.com/brucewang585/go-zero/tools/goctl/util"
+	"github.com/brucewang585/go-zero/tools/goctl/util/format"
 )
 
 const (

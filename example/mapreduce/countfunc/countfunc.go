@@ -15,7 +15,7 @@ import (
 	"time"
 
 	"github.com/google/gops/agent"
-	"github.com/tal-tech/go-zero/core/mr"
+	"github.com/brucewang585/go-zero/core/mr"
 )
 
 var (

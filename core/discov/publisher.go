@@ -1,12 +1,12 @@
 package discov
 
 import (
-	"github.com/tal-tech/go-zero/core/discov/internal"
-	"github.com/tal-tech/go-zero/core/lang"
-	"github.com/tal-tech/go-zero/core/logx"
-	"github.com/tal-tech/go-zero/core/proc"
-	"github.com/tal-tech/go-zero/core/syncx"
-	"github.com/tal-tech/go-zero/core/threading"
+	"github.com/brucewang585/go-zero/core/discov/internal"
+	"github.com/brucewang585/go-zero/core/lang"
+	"github.com/brucewang585/go-zero/core/logx"
+	"github.com/brucewang585/go-zero/core/proc"
+	"github.com/brucewang585/go-zero/core/syncx"
+	"github.com/brucewang585/go-zero/core/threading"
 	"go.etcd.io/etcd/clientv3"
 )
 

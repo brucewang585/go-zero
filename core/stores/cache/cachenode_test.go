@@ -11,12 +11,12 @@ import (
 
 	"github.com/alicebob/miniredis/v2"
 	"github.com/stretchr/testify/assert"
-	"github.com/tal-tech/go-zero/core/logx"
-	"github.com/tal-tech/go-zero/core/mathx"
-	"github.com/tal-tech/go-zero/core/stat"
-	"github.com/tal-tech/go-zero/core/stores/redis"
-	"github.com/tal-tech/go-zero/core/stores/redis/redistest"
-	"github.com/tal-tech/go-zero/core/syncx"
+	"github.com/brucewang585/go-zero/core/logx"
+	"github.com/brucewang585/go-zero/core/mathx"
+	"github.com/brucewang585/go-zero/core/stat"
+	"github.com/brucewang585/go-zero/core/stores/redis"
+	"github.com/brucewang585/go-zero/core/stores/redis/redistest"
+	"github.com/brucewang585/go-zero/core/syncx"
 )
 
 var errTestNotFound = errors.New("not found")

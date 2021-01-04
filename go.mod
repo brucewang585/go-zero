@@ -1,4 +1,4 @@
-module github.com/tal-tech/go-zero
+module github.com/brucewang585/go-zero
 
 go 1.14
 

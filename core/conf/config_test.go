@@ -6,7 +6,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
-	"github.com/tal-tech/go-zero/core/hash"
+	"github.com/brucewang585/go-zero/core/hash"
 )
 
 func TestConfigJson(t *testing.T) {

@@ -16,10 +16,11 @@ import (
 	"sync"
 	"sync/atomic"
 	"time"
+	"path/filepath"
 
-	"github.com/tal-tech/go-zero/core/iox"
-	"github.com/tal-tech/go-zero/core/sysx"
-	"github.com/tal-tech/go-zero/core/timex"
+	"github.com/brucewang585/go-zero/core/iox"
+	"github.com/brucewang585/go-zero/core/sysx"
+	"github.com/brucewang585/go-zero/core/timex"
 )
 
 const (
@@ -86,7 +87,8 @@ type (
 	logOptions struct {
 		gzipEnabled           bool
 		logStackCooldownMills int
-		keepDays              int
+		keepAge               int64
+		rotateSize            int64
 	}
 
 	LogOption func(options *logOptions)
@@ -262,7 +264,19 @@ func WithCooldownMillis(millis int) LogOption {
 
 func WithKeepDays(days int) LogOption {
 	return func(opts *logOptions) {
-		opts.keepDays = days
+		opts.keepAge = int64(days)*24*3600
+	}
+}
+
+func WithKeepAge(age string) LogOption {
+	return func(opts *logOptions) {
+		opts.keepAge = KeepAge2I(age)
+	}
+}
+
+func WithRotateSize(size string) LogOption {
+	return func(opts *logOptions) {
+		opts.rotateSize = RotateSize2I(size)
 	}
 }
 
@@ -277,8 +291,8 @@ func createOutput(path string) (io.WriteCloser, error) {
 		return nil, ErrLogPathNotSet
 	}
 
-	return NewLogger(path, DefaultRotateRule(path, backupFileDelimiter, options.keepDays,
-		options.gzipEnabled), options.gzipEnabled)
+	return NewLogger(path, DefaultRotateRule(path, backupFileDelimiter, options.keepAge,
+		options.rotateSize), options.gzipEnabled)
 }
 
 func errorSync(msg string, callDepth int) {
@@ -402,6 +416,10 @@ func setupWithFiles(c LogConf) error {
 	if c.KeepDays > 0 {
 		opts = append(opts, WithKeepDays(c.KeepDays))
 	}
+	if c.ServiceName == "" {
+		c.ServiceName = strings.SplitN(filepath.Base(os.Args[0]),".",2)[0]
+	}
+	c.Path = path.Join(c.Path,c.ServiceName)
 
 	accessFile := path.Join(c.Path, accessFilename)
 	errorFile := path.Join(c.Path, errorFilename)
@@ -441,6 +459,11 @@ func setupWithFiles(c LogConf) error {
 }
 
 func setupWithVolume(c LogConf) error {
+	if c.ServiceName == "" {
+		c.ServiceName = strings.SplitN(filepath.Base(os.Args[0]),".",2)[0]
+	}
+
+	//
 	if len(c.ServiceName) == 0 {
 		return ErrLogServiceNameNotSet
 	}

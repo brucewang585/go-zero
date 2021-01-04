@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/tal-tech/go-zero/core/fx"
+	"github.com/brucewang585/go-zero/core/fx"
 )
 
 func TestFxSplit(t *testing.T) {

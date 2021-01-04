@@ -8,122 +8,74 @@ import (
 	"log"
 	"os"
 	"path"
-	"path/filepath"
-	"strings"
 	"sync"
 	"time"
 
-	"github.com/tal-tech/go-zero/core/fs"
-	"github.com/tal-tech/go-zero/core/lang"
-	"github.com/tal-tech/go-zero/core/timex"
+	"github.com/brucewang585/go-zero/core/fs"
+	"github.com/brucewang585/go-zero/core/lang"
+	"github.com/brucewang585/go-zero/core/timex"
 )
 
 const (
 	dateFormat      = "2006-01-02"
+	baseTimeFormat  = "2006-01-02_15-04-05"
 	hoursPerDay     = 24
-	bufferSize      = 100
+	bufferSize      = 1000
 	defaultDirMode  = 0755
 	defaultFileMode = 0600
 )
 
 var ErrLogFileClosed = errors.New("error: log file closed")
 
-type (
+type (	
 	RotateRule interface {
-		BackupFileName() string
-		MarkRotated()
-		OutdatedFiles() []string
+		Init()
+
+		//
 		ShallRotate() bool
+		MarkRotated()
+		CurrentFile() string //��ȡ
+		OutdatedFiles() ([]string,error)
+
+		//
+		AddSize(s int64)
 	}
 
 	RotateLogger struct {
+		//��̬����
 		filename string
-		backup   string
-		fp       *os.File
-		channel  chan []byte
-		done     chan lang.PlaceholderType
 		rule     RotateRule
 		compress bool
-		keepDays int
+
+		//��̬����
+		curfile        string //filename+���ָ�����+ʱ��(BaseTimeFormat)
+		fp             *os.File
+		done           chan lang.PlaceholderType
+		write_channel  chan []byte
+		rotate_channel chan bool
+
 		// can't use threading.RoutineGroup because of cycle import
 		waitGroup sync.WaitGroup
 		closeOnce sync.Once
 	}
-
-	DailyRotateRule struct {
-		rotatedTime string
-		filename    string
-		delimiter   string
-		days        int
-		gzip        bool
-	}
 )
 
-func DefaultRotateRule(filename, delimiter string, days int, gzip bool) RotateRule {
+func DefaultRotateRule(filename, delimiter string, keepAge int64, rotateSize int64) RotateRule {
 	return &DailyRotateRule{
-		rotatedTime: getNowDate(),
 		filename:    filename,
 		delimiter:   delimiter,
-		days:        days,
-		gzip:        gzip,
+		keepAge:     keepAge,
+		rotatedSize:  rotateSize,
 	}
-}
-
-func (r *DailyRotateRule) BackupFileName() string {
-	return fmt.Sprintf("%s%s%s", r.filename, r.delimiter, getNowDate())
-}
-
-func (r *DailyRotateRule) MarkRotated() {
-	r.rotatedTime = getNowDate()
-}
-
-func (r *DailyRotateRule) OutdatedFiles() []string {
-	if r.days <= 0 {
-		return nil
-	}
-
-	var pattern string
-	if r.gzip {
-		pattern = fmt.Sprintf("%s%s*.gz", r.filename, r.delimiter)
-	} else {
-		pattern = fmt.Sprintf("%s%s*", r.filename, r.delimiter)
-	}
-
-	files, err := filepath.Glob(pattern)
-	if err != nil {
-		Errorf("failed to delete outdated log files, error: %s", err)
-		return nil
-	}
-
-	var buf strings.Builder
-	boundary := time.Now().Add(-time.Hour * time.Duration(hoursPerDay*r.days)).Format(dateFormat)
-	fmt.Fprintf(&buf, "%s%s%s", r.filename, r.delimiter, boundary)
-	if r.gzip {
-		buf.WriteString(".gz")
-	}
-	boundaryFile := buf.String()
-
-	var outdates []string
-	for _, file := range files {
-		if file < boundaryFile {
-			outdates = append(outdates, file)
-		}
-	}
-
-	return outdates
-}
-
-func (r *DailyRotateRule) ShallRotate() bool {
-	return len(r.rotatedTime) > 0 && getNowDate() != r.rotatedTime
 }
 
 func NewLogger(filename string, rule RotateRule, compress bool) (*RotateLogger, error) {
 	l := &RotateLogger{
-		filename: filename,
-		channel:  make(chan []byte, bufferSize),
-		done:     make(chan lang.PlaceholderType),
-		rule:     rule,
-		compress: compress,
+		filename:       filename,
+		rule:           rule,
+		done:           make(chan lang.PlaceholderType),
+		write_channel:  make(chan []byte, bufferSize),
+		rotate_channel: make(chan bool, 100),
 	}
 	if err := l.init(); err != nil {
 		return nil, err
@@ -152,7 +104,7 @@ func (l *RotateLogger) Close() error {
 
 func (l *RotateLogger) Write(data []byte) (int, error) {
 	select {
-	case l.channel <- data:
+	case l.write_channel <- data:
 		return len(data), nil
 	case <-l.done:
 		log.Println(string(data))
@@ -160,35 +112,92 @@ func (l *RotateLogger) Write(data []byte) (int, error) {
 	}
 }
 
-func (l *RotateLogger) getBackupFilename() string {
-	if len(l.backup) == 0 {
-		return l.rule.BackupFileName()
-	} else {
-		return l.backup
-	}
-}
-
 func (l *RotateLogger) init() error {
-	l.backup = l.rule.BackupFileName()
+	//ע�⣬һ��Ҫ���ã���rule��ʼ��
+	l.rule.Init()
 
-	if _, err := os.Stat(l.filename); err != nil {
-		basePath := path.Dir(l.filename)
+	//
+	l.curfile = l.rule.CurrentFile()
+	if _, err := os.Stat(l.curfile); err != nil {
+		basePath := path.Dir(l.curfile)
 		if _, err = os.Stat(basePath); err != nil {
 			if err = os.MkdirAll(basePath, defaultDirMode); err != nil {
 				return err
 			}
 		}
 
-		if l.fp, err = os.Create(l.filename); err != nil {
+		if l.fp, err = os.Create(l.curfile); err != nil {
 			return err
 		}
-	} else if l.fp, err = os.OpenFile(l.filename, os.O_APPEND|os.O_WRONLY, defaultFileMode); err != nil {
+	} else if l.fp, err = os.OpenFile(l.curfile, os.O_APPEND|os.O_WRONLY, defaultFileMode); err != nil {
 		return err
 	}
 
 	fs.CloseOnExec(l.fp)
 
 	return nil
+}
+
+func (l *RotateLogger) startWorker() {
+	l.waitGroup.Add(1)
+	go func() {
+		defer l.waitGroup.Done()
+
+		for {
+			select {
+			case event := <-l.write_channel:
+				l.writeToFile(event)
+
+			case <-l.done:
+				return
+			}
+		}
+	}()
+
+	l.waitGroup.Add(1)
+	go func() {
+		defer l.waitGroup.Done()
+
+		for {
+			select {
+			case <-l.rotate_channel:
+				l.maybeDeleteOutdatedFiles()
+
+			case <-l.done:
+				return
+			}
+		}
+	}()
+	//������1��
+	l.rotate_channel<-true
+}
+
+func (l *RotateLogger) writeToFile(v []byte) {
+	if l.rule.ShallRotate() {
+		//Rotate
+		//�رվ��ļ�
+		if l.fp != nil {
+			l.fp.Close()
+			l.fp = nil
+		}
+
+		//�ƺ����������������ļ�
+		l.rotate_channel <- true
+
+		//
+		l.rule.MarkRotated()
+
+		//�����ļ�
+		l.curfile = l.rule.CurrentFile()
+		if fp, err := os.Create(l.curfile); err == nil {
+			l.fp = fp
+			fs.CloseOnExec(l.fp)
+		}
+	}
+	if l.fp != nil {
+		l.fp.Write(v)
+		l.rule.AddSize(int64(len(v)))
+	}
 }
 
 func (l *RotateLogger) maybeCompressFile(file string) {
@@ -205,81 +214,16 @@ func (l *RotateLogger) maybeCompressFile(file string) {
 }
 
 func (l *RotateLogger) maybeDeleteOutdatedFiles() {
-	files := l.rule.OutdatedFiles()
+	files,_ := l.rule.OutdatedFiles()
 	for _, file := range files {
 		if err := os.Remove(file); err != nil {
-			Errorf("failed to remove outdated file: %s", file)
+			Errorf("failed to remove outdated file: %s,error:%v", file,err)
 		}
-	}
-}
-
-func (l *RotateLogger) postRotate(file string) {
-	go func() {
-		// we cannot use threading.GoSafe here, because of import cycle.
-		l.maybeCompressFile(file)
-		l.maybeDeleteOutdatedFiles()
-	}()
-}
-
-func (l *RotateLogger) rotate() error {
-	if l.fp != nil {
-		err := l.fp.Close()
-		l.fp = nil
-		if err != nil {
-			return err
-		}
-	}
-
-	_, err := os.Stat(l.filename)
-	if err == nil && len(l.backup) > 0 {
-		backupFilename := l.getBackupFilename()
-		err = os.Rename(l.filename, backupFilename)
-		if err != nil {
-			return err
-		}
-
-		l.postRotate(backupFilename)
-	}
-
-	l.backup = l.rule.BackupFileName()
-	if l.fp, err = os.Create(l.filename); err == nil {
-		fs.CloseOnExec(l.fp)
-	}
-
-	return err
-}
-
-func (l *RotateLogger) startWorker() {
-	l.waitGroup.Add(1)
-
-	go func() {
-		defer l.waitGroup.Done()
-
-		for {
-			select {
-			case event := <-l.channel:
-				l.write(event)
-			case <-l.done:
-				return
-			}
-		}
-	}()
-}
-
-func (l *RotateLogger) write(v []byte) {
-	if l.rule.ShallRotate() {
-		if err := l.rotate(); err != nil {
-			log.Println(err)
-		} else {
-			l.rule.MarkRotated()
-		}
-	}
-	if l.fp != nil {
-		l.fp.Write(v)
 	}
 }
 
 func compressLogFile(file string) {
+	return
 	start := timex.Now()
 	Infof("compressing log file: %s", file)
 	if err := gzipFile(file); err != nil {
@@ -291,6 +235,11 @@ func compressLogFile(file string) {
 
 func getNowDate() string {
 	return time.Now().Format(dateFormat)
+}
+
+func getNowAllTime() (string,string) {
+	now := time.Now()
+	return now.Format(dateFormat),now.Format(baseTimeFormat)
 }
 
 func gzipFile(file string) error {

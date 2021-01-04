@@ -1,8 +1,8 @@
 package generator
 
 import (
-	conf "github.com/tal-tech/go-zero/tools/goctl/config"
-	"github.com/tal-tech/go-zero/tools/goctl/rpc/parser"
+	conf "github.com/brucewang585/go-zero/tools/goctl/config"
+	"github.com/brucewang585/go-zero/tools/goctl/rpc/parser"
 )
 
 type Generator interface {

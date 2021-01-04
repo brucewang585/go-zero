@@ -5,12 +5,12 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/tal-tech/go-zero/core/collection"
-	conf "github.com/tal-tech/go-zero/tools/goctl/config"
-	"github.com/tal-tech/go-zero/tools/goctl/rpc/parser"
-	"github.com/tal-tech/go-zero/tools/goctl/util"
-	"github.com/tal-tech/go-zero/tools/goctl/util/format"
-	"github.com/tal-tech/go-zero/tools/goctl/util/stringx"
+	"github.com/brucewang585/go-zero/core/collection"
+	conf "github.com/brucewang585/go-zero/tools/goctl/config"
+	"github.com/brucewang585/go-zero/tools/goctl/rpc/parser"
+	"github.com/brucewang585/go-zero/tools/goctl/util"
+	"github.com/brucewang585/go-zero/tools/goctl/util/format"
+	"github.com/brucewang585/go-zero/tools/goctl/util/stringx"
 )
 
 const (
@@ -21,7 +21,7 @@ import (
 
 	{{.imports}}
 
-	"github.com/tal-tech/go-zero/core/logx"
+	"github.com/brucewang585/go-zero/core/logx"
 )
 
 type {{.logicName}} struct {

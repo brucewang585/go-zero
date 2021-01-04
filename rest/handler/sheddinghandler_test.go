@@ -8,8 +8,8 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
-	"github.com/tal-tech/go-zero/core/load"
-	"github.com/tal-tech/go-zero/core/stat"
+	"github.com/brucewang585/go-zero/core/load"
+	"github.com/brucewang585/go-zero/core/stat"
 )
 
 func init() {

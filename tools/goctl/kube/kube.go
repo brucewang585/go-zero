@@ -6,7 +6,7 @@ import (
 	"text/template"
 
 	"github.com/logrusorgru/aurora"
-	"github.com/tal-tech/go-zero/tools/goctl/util"
+	"github.com/brucewang585/go-zero/tools/goctl/util"
 	"github.com/urfave/cli"
 )
 

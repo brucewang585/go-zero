@@ -7,8 +7,8 @@ import (
 
 	"github.com/golang/mock/gomock"
 	"github.com/stretchr/testify/assert"
-	"github.com/tal-tech/go-zero/core/discov/internal"
-	"github.com/tal-tech/go-zero/core/logx"
+	"github.com/brucewang585/go-zero/core/discov/internal"
+	"github.com/brucewang585/go-zero/core/logx"
 	"go.etcd.io/etcd/clientv3"
 )
 

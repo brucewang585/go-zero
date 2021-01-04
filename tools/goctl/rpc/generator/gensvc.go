@@ -4,10 +4,10 @@ import (
 	"fmt"
 	"path/filepath"
 
-	conf "github.com/tal-tech/go-zero/tools/goctl/config"
-	"github.com/tal-tech/go-zero/tools/goctl/rpc/parser"
-	"github.com/tal-tech/go-zero/tools/goctl/util"
-	"github.com/tal-tech/go-zero/tools/goctl/util/format"
+	conf "github.com/brucewang585/go-zero/tools/goctl/config"
+	"github.com/brucewang585/go-zero/tools/goctl/rpc/parser"
+	"github.com/brucewang585/go-zero/tools/goctl/util"
+	"github.com/brucewang585/go-zero/tools/goctl/util/format"
 )
 
 const svcTemplate = `package svc

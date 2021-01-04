@@ -4,7 +4,7 @@ import (
 	"fmt"
 
 	red "github.com/go-redis/redis"
-	"github.com/tal-tech/go-zero/core/logx"
+	"github.com/brucewang585/go-zero/core/logx"
 )
 
 type ClosableNode interface {

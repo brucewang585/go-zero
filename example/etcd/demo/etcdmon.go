@@ -6,10 +6,10 @@ import (
 	"strings"
 	"time"
 
-	"github.com/tal-tech/go-zero/core/discov"
-	"github.com/tal-tech/go-zero/core/logx"
-	"github.com/tal-tech/go-zero/core/proc"
-	"github.com/tal-tech/go-zero/core/syncx"
+	"github.com/brucewang585/go-zero/core/discov"
+	"github.com/brucewang585/go-zero/core/logx"
+	"github.com/brucewang585/go-zero/core/proc"
+	"github.com/brucewang585/go-zero/core/syncx"
 	"go.etcd.io/etcd/clientv3"
 )
 

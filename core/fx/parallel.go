@@ -1,6 +1,6 @@
 package fx
 
-import "github.com/tal-tech/go-zero/core/threading"
+import "github.com/brucewang585/go-zero/core/threading"
 
 func Parallel(fns ...func()) {
 	group := threading.NewRoutineGroup()

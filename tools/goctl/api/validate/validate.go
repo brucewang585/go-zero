@@ -5,7 +5,7 @@ import (
 	"fmt"
 
 	"github.com/logrusorgru/aurora"
-	"github.com/tal-tech/go-zero/tools/goctl/api/parser"
+	"github.com/brucewang585/go-zero/tools/goctl/api/parser"
 	"github.com/urfave/cli"
 )
 

@@ -4,7 +4,7 @@ import (
 	"log"
 	"strconv"
 
-	"github.com/tal-tech/go-zero/core/mr"
+	"github.com/brucewang585/go-zero/core/mr"
 )
 
 type User struct {
